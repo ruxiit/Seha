@@ -8,6 +8,14 @@ export const hashNIN = (nin: string): string => {
   return crypto.createHash('sha256').update(nin).digest('hex');
 };
 
+/**
+ * Hash the Phone Number using SHA-256 after stripping non-numeric characters.
+ */
+export const hashPhone = (phone: string): string => {
+  const normalized = phone.replace(/\D/g, '');
+  return crypto.createHash('sha256').update(normalized).digest('hex');
+};
+
 // Must be exactly 32 bytes (256 bits) for AES-256
 // Default to a 32-byte hex string placeholder for development environments.
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'; 
