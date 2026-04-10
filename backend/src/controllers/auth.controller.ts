@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { supabaseAdmin as supabase } from '../config/supabase';
-import { hashNIN, hashPhone, encryptData } from '../utils/crypto';
+import { hashNIN, hashPhone, encryptData, decryptData } from '../utils/crypto';
 import { AppError } from '../middleware/error.middleware';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'hackathon-super-secret';
@@ -23,7 +23,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     // Verify user by hashed NIN from 'Users' table
     const { data: user, error } = await supabase
       .from('Users')
-      .select('id, nin_hash, password_hash, role')
+      .select('id, nin_hash, password_hash, role, encrypted_profile')
       .eq('nin_hash', nin_hash)
       .single();
 
@@ -49,10 +49,21 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
+    // Decrypt profile if present
+    let profile: Record<string, any> = {};
+    if (user.encrypted_profile) {
+      try {
+        profile = JSON.parse(decryptData(user.encrypted_profile));
+      } catch (e) {
+        console.error('Failed to decrypt profile', e);
+      }
+    }
+
     res.status(200).json({
       message: 'Login successful',
       token,
-      user: payload
+      user: payload,
+      profile,
     });
   } catch (error) {
     next(error);
@@ -90,6 +101,58 @@ export const requestOtp = async (req: Request, res: Response, next: NextFunction
     // In a real app, send OTP to phone here. We mock it for MVP.
     res.status(200).json({
       message: 'OTP sent successfully (mocked 1234)'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyPatientOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { nin, phone, otp } = req.body;
+
+    if (!nin || !phone || !otp) {
+      const err = new Error('NIN, phone and OTP are required') as AppError;
+      err.status = 400;
+      throw err;
+    }
+
+    if (otp !== '1234') {
+      const err = new Error('Invalid OTP') as AppError;
+      err.status = 400;
+      throw err;
+    }
+
+    const nin_hash = hashNIN(nin);
+    const phone_hash = hashPhone(phone);
+
+    const { data: user, error } = await supabase
+      .from('Users')
+      .select('id, encrypted_profile, role')
+      .eq('nin_hash', nin_hash)
+      .eq('phone_hash', phone_hash)
+      .eq('role', 'patient')
+      .single();
+
+    if (error || !user) {
+      const err = new Error('Patient not found') as AppError;
+      err.status = 404;
+      throw err;
+    }
+
+    let profile = {};
+    if (user.encrypted_profile) {
+      try {
+        profile = JSON.parse(decryptData(user.encrypted_profile));
+      } catch (e) {
+        console.error('Failed to decrypt profile', e);
+      }
+    }
+
+    // Usually we would sign a JWT here. For MVP OTP flow, we return success + profile.
+    res.status(200).json({
+      message: 'OTP verified successfully',
+      profile
     });
   } catch (error) {
     next(error);

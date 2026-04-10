@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { supabaseAdmin as supabase } from '../config/supabase';
-import { hashNIN } from '../utils/crypto';
+import { hashNIN, decryptData } from '../utils/crypto';
 import { AuthRequest } from '../types';
 import { AppError } from '../middleware/error.middleware';
 
@@ -174,3 +174,48 @@ export const getPatientPrescriptionsByHash = async (
     next(error);
   }
 };
+
+// ─────────────────────────────────────────────────────────────
+// [Doctor] GET /api/patients/profile?nin=<plain_nin>
+// Fetch a patient's name and age by decrypting their profile using the server key
+// ─────────────────────────────────────────────────────────────
+export const getPatientProfileByPlainNIN = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { nin } = req.query;
+    if (!nin || typeof nin !== 'string') {
+      const err = new Error('NIN query parameter is required') as AppError;
+      err.status = 400;
+      throw err;
+    }
+
+    const nin_hash = hashNIN(nin);
+
+    const { data: user, error } = await supabase
+      .from('Users')
+      .select('encrypted_profile')
+      .eq('nin_hash', nin_hash)
+      .eq('role', 'patient')
+      .single();
+
+    if (error || !user || !user.encrypted_profile) {
+      res.status(404).json({ message: 'Patient profile not found.' });
+      return;
+    }
+
+    let profile: any = {};
+    try {
+      profile = JSON.parse(decryptData(user.encrypted_profile));
+    } catch (e) {
+      console.error('Failed to decrypt patient profile', e);
+    }
+
+    res.status(200).json({ name: profile.name || '', age: profile.age || '' });
+  } catch (error) {
+    next(error);
+  }
+};
+

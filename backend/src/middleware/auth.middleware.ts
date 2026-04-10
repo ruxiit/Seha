@@ -29,8 +29,9 @@ export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction)
 
 export const authorizeRole = (allowedRoles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
-    if (!req.user || !allowedRoles.includes(req.user.role)) {
-      const err = new Error('Forbidden: Insufficient privileges') as AppError;
+    const userRole = req.user?.role?.trim().toLowerCase();
+    if (!userRole || !allowedRoles.includes(userRole)) {
+      const err = new Error(`Forbidden: Insufficient privileges (Role: ${req.user?.role})`) as AppError;
       err.status = 403;
       next(err);
       return;

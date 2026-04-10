@@ -27,7 +27,10 @@ CREATE TABLE "Prescriptions" (
     patient_id UUID REFERENCES "Patients"(id) ON DELETE CASCADE,
     doctor_id UUID NOT NULL, 
     encrypted_blob TEXT NOT NULL,
+    pharmacy_encrypted_blob TEXT,
     status TEXT DEFAULT 'pending', -- e.g., 'pending', 'dispensed'
+    dispensed_by UUID,
+    dispensed_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

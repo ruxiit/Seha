@@ -69,3 +69,41 @@ export const logSecurityEvent = async (
     console.error('[SecurityLog] Failed to log event:', err);
   }
 };
+
+// ─────────────────────────────────────────────────────────────
+// FETCH ALL USERS [Admin]
+// GET /api/admin/users
+// ─────────────────────────────────────────────────────────────
+export const getAllUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { data: users, error } = await supabase
+      .from('Users')
+      .select('id, role, created_at, encrypted_profile')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const decryptedUsers = (users || []).map(user => {
+      let profile = {};
+      if (user.encrypted_profile) {
+        try {
+          // You must import decryptData from '../utils/crypto' at the top of the file!
+          const { decryptData } = require('../utils/crypto');
+          profile = JSON.parse(decryptData(user.encrypted_profile));
+        } catch (e) {
+          console.error(`Failed to decrypt profile for user ${user.id}`);
+        }
+      }
+      return {
+        id: user.id,
+        role: user.role,
+        created_at: user.created_at,
+        profile,
+      };
+    });
+
+    res.status(200).json({ users: decryptedUsers });
+  } catch (error) {
+    next(error);
+  }
+};

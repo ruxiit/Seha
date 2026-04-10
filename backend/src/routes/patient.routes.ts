@@ -4,6 +4,7 @@ import {
   registerPublicKey,
   getMyHistory,
   getPatientPrescriptionsByHash,
+  getPatientProfileByPlainNIN,
 } from '../controllers/patient.controller';
 import { verifyToken, authorizeRole } from '../middleware/auth.middleware';
 
@@ -20,5 +21,8 @@ router.get('/history', verifyToken, authorizeRole(['patient']), getMyHistory);
 
 // [Patient] Get own prescriptions by nin_hash (no token needed, secured by knowledge of hash)
 router.get('/:nin_hash/prescriptions', getPatientPrescriptionsByHash);
+
+// [Doctor] Get patient profile (name, age) by plain NIN
+router.get('/profile', verifyToken, authorizeRole(['doctor', 'admin']), getPatientProfileByPlainNIN);
 
 export default router;
