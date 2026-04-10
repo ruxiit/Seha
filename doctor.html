@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صحة (Seha) - منصة الطبيب المتقدمة</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- IBM Plex Sans Arabic -->
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"IBM Plex Sans Arabic"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6', // Teal
+                            600: '#0d9488', // Deep Teal
+                            900: '#134e4a',
+                        },
+                        surface: '#ffffff',
+                        background: '#f8fafc',
+                    },
+                    boxShadow: {
+                        'premium': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #f8fafc; color: #334155; }
+        
+        /* Premium Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Glassmorphism Panels */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
+        }
+
+        /* Navigation Transitions */
+        .nav-item.active {
+            background-color: #f0fdfa; /* brand-50 */
+            color: #0d9488; /* brand-600 */
+            border-right: 4px solid #0d9488;
+            font-weight: 600;
+        }
+
+        /* Page Transitions */
+        .page {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .page.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            animation: fadeUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Timeline styling */
+        .timeline-line {
+            position: absolute; right: 11px; top: 0; bottom: 0; width: 2px; background-color: #e2e8f0; z-index: 0;
+        }
+        
+        /* Custom Checkbox */
+        .slot-checkbox:checked + div {
+            background-color: #14b8a6; color: white; border-color: #14b8a6;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Sidebar -->
+    <aside class="w-72 bg-white border-l border-slate-200 flex flex-col z-20 shadow-[10px_0_30px_rgba(0,0,0,0.02)]">
+        <!-- Logo -->
+        <div class="h-24 flex items-center px-8 border-b border-slate-100">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white shadow-lg shadow-brand-500/30 ml-4">
+                <i class="fa-solid fa-staff-snake text-xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-slate-800 tracking-tight">صحة</h1>
+            <span class="mr-2 text-xs font-semibold bg-slate-100 text-slate-500 px-2 py-1 rounded-md">PRO</span>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 py-6 space-y-1 overflow-y-auto px-4" id="nav-menu">
+            <!-- Feature 2: Dashboard / Schedule -->
+            <button onclick="switchPage('schedule', this)" class="nav-item active w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-all text-right">
+                <i class="fa-regular fa-calendar-days text-xl w-6 text-center"></i>
+                <span class="text-[15px]">إدارة المواعيد والجدولة</span>
+            </button>
+            
+            <!-- Features 3, 4, 5: Patient & Prescriptions -->
+            <button onclick="switchPage('prescription', this)" class="nav-item w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-all text-right mt-2">
+                <i class="fa-solid fa-file-prescription text-xl w-6 text-center"></i>
+                <span class="text-[15px]">سجل المرضى والوصفات</span>
+            </button>
+
+            <button onclick="switchPage('pharmacy', this)" class="nav-item w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-all text-right mt-2">
+                <i class="fa-solid fa-pills text-xl w-6 text-center"></i>
+                <span class="text-[15px]">دليل الأدوية (مخزون حي)</span>
+            </button>
+        </nav>
+
+        <!-- Security Badge -->
+        <div class="p-6 border-t border-slate-100 bg-slate-50/50">
+            <div class="flex items-center gap-3 text-brand-600 mb-2">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span class="text-sm font-bold">النظام مشفر (RLS)</span>
+            </div>
+            <p class="text-xs text-slate-500 leading-relaxed">بيانات مرضاك مؤمنة بقواعد PostgreSQL ولا يمكن لطبيب آخر الاطلاع عليها.</p>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen relative bg-background">
+        
+        <!-- Header (Feature 1: Medical Credentials) -->
+        <header class="h-24 glass-panel border-b border-slate-200 px-10 flex items-center justify-between z-10 sticky top-0">
+            <div class="relative w-96">
+                <i class="fa-solid fa-search absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" placeholder="ابحث عن مريض بالاسم أو الرقم الوطني..." class="w-full bg-slate-100 border-none rounded-full py-3 pr-12 pl-4 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all shadow-inner">
+            </div>
+
+            <!-- Feature 1: Verified Credentials -->
+            <div class="flex items-center gap-6">
+                <div class="text-left border-l border-slate-200 pl-6">
+                    <div class="flex items-center gap-2 justify-end mb-1">
+                        <i class="fa-solid fa-circle-check text-blue-500 text-sm" title="طبيب معتمد"></i>
+                        <h2 class="font-bold text-slate-800">د. يوسف بركات</h2>
+                    </div>
+                    <p class="text-xs text-slate-500">طب باطني • رقم التسجيل الطبي: 14529</p>
+                </div>
+                <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-md">
+                    <img src="https://ui-avatars.com/api/?name=Y+B&background=0d9488&color=fff" alt="Doctor" class="w-full h-full object-cover">
+                </div>
+            </div>
+        </header>
+
+        <!-- Pages Container -->
+        <div class="flex-1 overflow-y-auto p-10 scroll-smooth">
+            
+            <!-- PAGE 1: SCHEDULE & APPOINTMENTS (Feature 2) -->
+            <div id="page-schedule" class="page active max-w-6xl mx-auto space-y-8">
+                <div class="flex items-end justify-between">
+                    <div>
+                        <h2 class="text-3xl font-bold text-slate-800 mb-2">إدارة المواعيد والجدولة</h2>
+                        <p class="text-slate-500">تحكم في فترات عملك والمواعيد المتاحة للحجز من قبل المرضى.</p>
+                    </div>
+                    <div class="bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm font-semibold text-brand-600 flex items-center gap-2">
+                        <i class="fa-regular fa-calendar"></i> اليوم: 7 أفريل 2026
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-premium border border-slate-100 p-8">
+                    <div class="flex items-center justify-between mb-6 pb-6 border-b border-slate-100">
+                        <h3 class="text-lg font-bold text-slate-800">الفترات الزمنية (Time Slots)</h3>
+                        <div class="flex gap-4 text-sm">
+                            <span class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-brand-500"></div> متاح للحجز</span>
+                            <span class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-slate-200"></div> مغلق</span>
+                            <span class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-amber-400"></div> محجوز مسبقاً</span>
+                        </div>
+                    </div>
+
+                    <!-- Slots Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <!-- Booked Slot -->
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-full h-1 bg-amber-400"></div>
+                            <p class="font-bold text-amber-800 text-lg mb-1">09:00 ص</p>
+                            <p class="text-xs text-amber-600 font-semibold truncate">محمد رضا</p>
+                        </div>
+                        
+                        <!-- Toggleable Slots -->
+                        <label class="cursor-pointer">
+                            <input type="checkbox" class="hidden slot-checkbox" checked>
+                            <div class="border border-slate-200 rounded-xl p-4 text-center transition-all hover:shadow-md">
+                                <p class="font-bold text-lg mb-1">09:30 ص</p>
+                                <p class="text-xs">متاح</p>
+                            </div>
+                        </label>
+
+                        <label class="cursor-pointer">
+                            <input type="checkbox" class="hidden slot-checkbox" checked>
+                            <div class="border border-slate-200 rounded-xl p-4 text-center transition-all hover:shadow-md">
+                                <p class="font-bold text-lg mb-1">10:00 ص</p>
+                                <p class="text-xs">متاح</p>
+                            </div>
+                        </label>
+
+                        <!-- Closed Slot -->
+                        <label class="cursor-pointer">
+                            <input type="checkbox" class="hidden slot-checkbox">
+                            <div class="border border-slate-200 rounded-xl p-4 text-center transition-all hover:shadow-md bg-slate-50 text-slate-400">
+                                <p class="font-bold text-lg mb-1">10:30 ص</p>
+                                <p class="text-xs">مغلق</p>
+                            </div>
+                        </label>
+
+                        <!-- Booked Slot -->
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-full h-1 bg-amber-400"></div>
+                            <p class="font-bold text-amber-800 text-lg mb-1">11:00 ص</p>
+                            <p class="text-xs text-amber-600 font-semibold truncate">سارة بن علي</p>
+                        </div>
+                        
+                        <label class="cursor-pointer">
+                            <input type="checkbox" class="hidden slot-checkbox" checked>
+                            <div class="border border-slate-200 rounded-xl p-4 text-center transition-all hover:shadow-md">
+                                <p class="font-bold text-lg mb-1">11:30 ص</p>
+                                <p class="text-xs">متاح</p>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div class="mt-8 text-left">
+                        <button class="bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-brand-500/30">حفظ التعديلات في قاعدة البيانات</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 2: PATIENT HISTORY & PRESCRIPTIONS (Features 3, 4, 5) -->
+            <div id="page-prescription" class="page max-w-7xl mx-auto space-y-6">
+                
+                <!-- Patient Context Header -->
+                <div class="bg-white rounded-2xl shadow-premium border border-slate-100 p-6 flex items-center justify-between">
+                    <div class="flex items-center gap-5">
+                        <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl font-bold">
+                            أ.م
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">أمين منصوري</h2>
+                            <p class="text-slate-500 text-sm mt-1">العمر: 45 سنة | فصيلة الدم: O+ | الحساسية: البنسلين</p>
+                        </div>
+                    </div>
+                    <div class="bg-brand-50 text-brand-700 px-4 py-2 rounded-lg font-semibold text-sm border border-brand-100">
+                        حالة الزيارة: قيد الفحص
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Right Col: Medical History (Feature 3) -->
+                    <div class="bg-white rounded-2xl shadow-premium border border-slate-100 p-6 flex flex-col h-[600px]">
+                        <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-brand-500"></i> التاريخ الطبي والوصفات السابقة
+                        </h3>
+                        
+                        <div class="relative flex-1 overflow-y-auto pr-2">
+                            <div class="timeline-line"></div>
+                            
+                            <!-- History Item 1 -->
+                            <div class="relative z-10 mb-8 flex gap-4">
+                                <div class="w-6 h-6 rounded-full bg-brand-500 border-4 border-white shadow-sm flex-shrink-0 mt-1"></div>
+                                <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 w-full">
+                                    <p class="text-xs text-slate-500 font-bold mb-1">15 مارس 2026</p>
+                                    <p class="font-bold text-slate-800 text-sm mb-2">التهاب القصبات الهوائية</p>
+                                    <div class="bg-white border border-slate-200 rounded-lg p-2 text-sm text-slate-600">
+                                        <p class="font-semibold text-brand-600"><i class="fa-solid fa-pills text-xs"></i> Azithromycin 500mg</p>
+                                        <p class="text-xs mt-1">حبة واحدة يومياً لمدة 3 أيام</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- History Item 2 (ACTIVE PRESCRIPTION) -->
+                            <div class="relative z-10 mb-8 flex gap-4">
+                                <div class="w-6 h-6 rounded-full bg-amber-500 border-4 border-white shadow-sm flex-shrink-0 mt-1"></div>
+                                <div class="bg-amber-50/50 border border-amber-100 rounded-xl p-4 w-full">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <p class="text-xs text-amber-600 font-bold">1 أفريل 2026 (وصفة نشطة)</p>
+                                        <span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded">لم تصرف بعد</span>
+                                    </div>
+                                    <p class="font-bold text-slate-800 text-sm mb-2">متابعة ضغط الدم</p>
+                                    <div class="bg-white border border-amber-200 rounded-lg p-2 text-sm text-slate-600 shadow-sm" id="active-drug">
+                                        <p class="font-semibold text-amber-600"><i class="fa-solid fa-capsules text-xs"></i> Amlodipine 5mg</p>
+                                        <p class="text-xs mt-1">حبة واحدة صباحاً - لمدة شهر</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Left Col: Issue Digital Prescription (Feature 4 & 5) -->
+                    <div class="lg:col-span-2 bg-white rounded-2xl shadow-premium border border-slate-100 p-6 flex flex-col h-[600px]">
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-file-signature text-brand-500"></i> إصدار وصفة رقمية جديدة
+                            </h3>
+                            <span class="text-xs font-mono bg-slate-100 px-3 py-1 rounded-md text-slate-500">ID: #RX-2026-994</span>
+                        </div>
+
+                        <!-- Add Medication Form (Feature 4) -->
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1">الدواء (مرتبط بقاعدة البيانات)</label>
+                                    <select id="drug-select" class="w-full border border-slate-300 rounded-lg py-2.5 px-3 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                        <option value="Paracetamol">Paracetamol 1000mg</option>
+                                        <option value="Amlodipine" class="text-amber-600 font-bold">Amlodipine 5mg (موجود بوصفة نشطة)</option>
+                                        <option value="Loratadine">Loratadine 10mg</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1">الجرعة المحددة (Dosage)</label>
+                                    <input type="text" placeholder="مثال: حبة واحدة كل 8 ساعات" class="w-full border border-slate-300 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                </div>
+                            </div>
+                            
+                            <!-- Feature 5 Error Message Container (Hidden by default) -->
+                            <div id="duplicate-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                                <i class="fa-solid fa-triangle-exclamation text-red-500 mt-0.5"></i>
+                                <div>
+                                    <p class="text-sm font-bold text-red-700">تحذير أمني من النظام (منع التكرار)</p>
+                                    <p class="text-xs text-red-600 mt-1">لا يمكن إضافة دواء <span class="font-bold">Amlodipine 5mg</span>. المريض يمتلك وصفة نشطة سارية المفعول لنفس الدواء لم يتم صرفها من الصيدلية بعد. يرجى تعديل الوصفة القديمة أو اختيار دواء بديل.</p>
+                                </div>
+                            </div>
+
+                            <button type="button" onclick="addMedication()" class="w-full bg-white border-2 border-dashed border-slate-300 text-slate-600 font-bold py-2 rounded-lg hover:border-brand-500 hover:text-brand-600 transition-colors flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-plus"></i> إضافة الدواء للوصفة
+                            </button>
+                        </div>
+
+                        <!-- Current Prescription List -->
+                        <div class="flex-1 overflow-y-auto">
+                            <h4 class="text-sm font-bold text-slate-500 mb-3">الأدوية المضافة للوصفة الحالية:</h4>
+                            <div id="prescription-list" class="space-y-3">
+                                <!-- Example added drug -->
+                                <div class="flex items-center justify-between p-3 border border-slate-100 rounded-lg shadow-sm">
+                                    <div>
+                                        <p class="font-bold text-slate-800 text-sm">Paracetamol 1000mg</p>
+                                        <p class="text-xs text-slate-500">حبة عند اللزوم (أقصى حد 3 في اليوم)</p>
+                                    </div>
+                                    <button class="text-red-400 hover:text-red-600 transition-colors"><i class="fa-regular fa-trash-can"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action -->
+                        <div class="mt-4 pt-4 border-t border-slate-100 flex justify-end">
+                            <button class="bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-brand-500/30 flex items-center gap-2">
+                                <i class="fa-solid fa-paper-plane"></i> إصدار واعتماد الوصفة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 3: PHARMACY / INVENTORY (Placeholder for flow) -->
+            <div id="page-pharmacy" class="page max-w-6xl mx-auto flex flex-col items-center justify-center h-[70vh] text-center">
+                <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center text-4xl text-slate-300 mb-6">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">دليل الأدوية والمخزون الحي</h2>
+                <p class="text-slate-500 max-w-md">مزامنة مباشرة مع الصيدليات لعرض توافر الأدوية لمنع وصف أدوية مفقودة من السوق.</p>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // --- Navigation Logic ---
+        function switchPage(pageId, btnElement) {
+            // Update Navigation UI
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('active', 'bg-brand-50', 'text-brand-600', 'border-r-4', 'border-brand-600', 'font-semibold');
+                item.classList.add('text-slate-600', 'hover:bg-slate-50');
+            });
+            
+            // Add styling to clicked nav item
+            btnElement.classList.add('active');
+            btnElement.classList.remove('text-slate-600', 'hover:bg-slate-50');
+            btnElement.style.backgroundColor = '#f0fdfa';
+            btnElement.style.color = '#0d9488';
+            btnElement.style.borderRight = '4px solid #0d9488';
+            btnElement.style.fontWeight = '600';
+
+            // Switch Pages UI
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => {
+                page.classList.remove('active');
+            });
+
+            const activePage = document.getElementById('page-' + pageId);
+            // Small timeout to allow display block to render before opacity animation
+            setTimeout(() => {
+                activePage.classList.add('active');
+            }, 10);
+        }
+
+        // --- Feature 5 Logic: Prevent Duplicate Prescriptions ---
+        function addMedication() {
+            const drugSelect = document.getElementById('drug-select');
+            const selectedDrug = drugSelect.value;
+            const errorBox = document.getElementById('duplicate-error');
+            const prescriptionList = document.getElementById('prescription-list');
+
+            // Business Logic Simulation: If doctor tries to prescribe Amlodipine (which is active in history)
+            if (selectedDrug === 'Amlodipine') {
+                // Show Error
+                errorBox.classList.remove('hidden');
+                errorBox.classList.add('animate-pulse');
+                setTimeout(() => errorBox.classList.remove('animate-pulse'), 1000);
+            } else {
+                // Hide Error if visible
+                errorBox.classList.add('hidden');
+                
+                // Add to UI List (Simulation)
+                const newDrugHTML = `
+                    <div class="flex items-center justify-between p-3 border border-slate-100 rounded-lg shadow-sm bg-white">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">${selectedDrug}</p>
+                            <p class="text-xs text-slate-500">حسب التوجيهات الطبية</p>
+                        </div>
+                        <button class="text-red-400 hover:text-red-600 transition-colors" onclick="this.parentElement.remove()"><i class="fa-regular fa-trash-can"></i></button>
+                    </div>
+                `;
+                prescriptionList.insertAdjacentHTML('beforeend', newDrugHTML);
+                
+                // Reset select
+                drugSelect.value = 'Loratadine'; 
+            }
+        }
+    </script>
+</body>
+</html>
