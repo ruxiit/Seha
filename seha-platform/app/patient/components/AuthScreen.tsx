@@ -1,6 +1,5 @@
-// AuthScreen.tsx
 import React from 'react';
-import { ShieldCheck, Phone, KeyRound, AlertCircle, Lock, ChevronLeft } from 'lucide-react';
+import { ShieldCheck, Phone, KeyRound, AlertCircle, Lock } from 'lucide-react';
 
 interface AuthScreenProps {
   authStep: 'LOGIN_NIN' | 'LOGIN_OTP';
@@ -23,173 +22,83 @@ export default function AuthScreen({
   phone, setPhone,
   otp, setOtp,
   isLoading, error,
-  handleNinSubmit, handleOtpSubmit,
+  handleNinSubmit, handleOtpSubmit
 }: AuthScreenProps) {
-  const isNinStep = authStep === 'LOGIN_NIN';
-
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-slate-50 px-4">
-      {/* Logo block */}
-      <div className="flex flex-col items-center mb-8 select-none">
-        <div className="w-[60px] h-[60px] bg-blue-600 rounded-[18px] flex items-center justify-center mb-4">
-          <ShieldCheck size={28} className="text-white" strokeWidth={2.2} />
-        </div>
-        <h1 className="text-[22px] font-medium text-slate-900 tracking-tight">منصة المريض</h1>
-        <p className="text-[13px] text-slate-400 mt-1">محفظتك الصحية الرقمية</p>
-      </div>
-
-      {/* Step indicators */}
-      <div className="flex gap-1.5 mb-5">
-        <div className={`h-1.5 rounded-full transition-all duration-300 ${isNinStep ? 'w-6 bg-blue-600' : 'w-1.5 bg-slate-300'}`} />
-        <div className={`h-1.5 rounded-full transition-all duration-300 ${!isNinStep ? 'w-6 bg-blue-600' : 'w-1.5 bg-slate-300'}`} />
-      </div>
-
-      {/* Card */}
-      <div
-        className="w-full max-w-[360px] bg-white rounded-[20px] border border-slate-100 p-7"
-        dir="rtl"
-        style={{ boxShadow: '0 2px 24px 0 rgba(0,0,0,0.06)' }}
-      >
-        {/* Error banner */}
-        {error && (
-          <div className="mb-5 flex items-start gap-2.5 bg-red-50 border border-red-100 text-red-600 text-[13px] font-medium rounded-xl px-4 py-3">
-            <AlertCircle size={15} className="shrink-0 mt-0.5" />
-            <span>{error}</span>
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-10">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-xl shadow-blue-500/30">
+            <ShieldCheck size={32} />
           </div>
-        )}
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">منصة المريض</h1>
+          <p className="text-slate-500 mt-2">الوصول لمحفظتك الصحية الرقمية</p>
+        </div>
 
-        {/* ── Step 1 — NIN + Phone ── */}
-        {isNinStep ? (
-          <form onSubmit={handleNinSubmit}>
-            {/* Phone field */}
-            <div className="mb-4">
-              <label className="block text-[12px] font-medium text-slate-400 mb-1.5 tracking-wide">
-                رقم الهاتف
-              </label>
-              <div className="relative">
-                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none">
-                  <Phone size={16} />
-                </span>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={e => setPhone(e.target.value)}
-                  placeholder="05xxxxxxxx"
-                  dir="ltr"
-                  autoFocus
-                  className="
-                    w-full pr-10 pl-4 py-3 text-[15px] text-slate-900 font-medium
-                    bg-slate-50 border border-slate-200 rounded-[12px]
-                    focus:bg-white focus:border-blue-500 focus:ring-0
-                    outline-none transition-colors placeholder:text-slate-300
-                  "
-                />
+        <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100" dir="rtl">
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 text-red-600 text-sm font-medium rounded-xl border border-red-100 flex items-start gap-2">
+              <AlertCircle size={18} className="shrink-0 mt-0.5" /> {error}
+            </div>
+          )}
+
+          {authStep === 'LOGIN_NIN' ? (
+            <form onSubmit={handleNinSubmit} className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <div className="mb-4">
+                <label className="block text-sm font-bold text-slate-700 mb-2">رقم الهاتف</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                    <Phone className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
+                    className="w-full pr-12 px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none font-medium text-slate-900 text-lg text-left"
+                    placeholder="05..." dir="ltr" autoFocus />
+                </div>
               </div>
-            </div>
-
-            {/* NIN field */}
-            <div className="mb-1">
-              <label className="block text-[12px] font-medium text-slate-400 mb-1.5 tracking-wide">
-                الرقم الوطني (NIN)
-              </label>
-              <div className="relative">
-                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none">
-                  <KeyRound size={16} />
-                </span>
-                <input
-                  type="text"
-                  value={nin}
-                  onChange={e => setNin(e.target.value)}
-                  placeholder="أدخل رقمك الوطني"
-                  dir="ltr"
-                  className="
-                    w-full pr-10 pl-4 py-3 text-[15px] text-slate-900 font-medium
-                    bg-slate-50 border border-slate-200 rounded-[12px]
-                    focus:bg-white focus:border-blue-500 focus:ring-0
-                    outline-none transition-colors placeholder:text-slate-300
-                  "
-                />
+              <div className="mb-6">
+                <label className="block text-sm font-bold text-slate-700 mb-2">الرقم الوطني (NIN)</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                    <KeyRound className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <input type="text" value={nin} onChange={e => setNin(e.target.value)}
+                    className="w-full pr-12 px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none font-medium text-slate-900 text-lg text-left"
+                    placeholder="أدخل رقمك الوطني" dir="ltr" autoFocus />
+                </div>
+                <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                  <Lock size={11} /> يُشفَّر رقمك محلياً — لا يُرسل إلى الخادم مطلقاً.
+                </p>
               </div>
-            </div>
-
-            <p className="flex items-center justify-end gap-1 text-[11px] text-slate-300 mb-5 mt-2">
-              <Lock size={10} />
-              يُشفَّر رقمك محلياً — لا يُرسل إلى الخادم مطلقاً
-            </p>
-
-            <button
-              type="submit"
-              className="
-                w-full py-[14px] bg-blue-600 hover:bg-blue-700 active:scale-[0.98]
-                text-white text-[15px] font-medium rounded-[12px]
-                transition-all duration-150
-              "
-            >
-              إرسال رمز التحقق
-            </button>
-          </form>
-
-        ) : (
-        /* ── Step 2 — OTP ── */
-          <form onSubmit={handleOtpSubmit}>
-            {/* Back link */}
-            <button
-              type="button"
-              onClick={() => setAuthStep('LOGIN_NIN')}
-              className="flex items-center gap-1 text-[13px] text-slate-400 hover:text-slate-700 mb-5 transition-colors"
-            >
-              <ChevronLeft size={14} />
-              تغيير البيانات
-            </button>
-
-            <label className="block text-[12px] font-medium text-slate-400 mb-1.5 tracking-wide">
-              رمز التحقق
-            </label>
-
-            <input
-              type="number"
-              value={otp}
-              onChange={e => setOtp(e.target.value)}
-              placeholder="• • • •"
-              autoFocus
-              className="
-                w-full py-4 text-center text-[28px] font-semibold tracking-[0.6em]
-                text-slate-900 bg-slate-50 border border-slate-200 rounded-[12px]
-                focus:bg-white focus:border-blue-500 outline-none
-                transition-colors placeholder:tracking-normal placeholder:text-[18px]
-                placeholder:text-slate-300 mb-3
-              "
-            />
-
-            <div className="flex items-center justify-center bg-blue-50 rounded-xl py-2.5 mb-5">
-              <p className="text-[12px] font-medium text-blue-500">للتجربة: أدخل 1234</p>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="
-                w-full py-[14px] bg-blue-600 hover:bg-blue-700 active:scale-[0.98]
-                disabled:opacity-50 text-white text-[15px] font-medium rounded-[12px]
-                flex items-center justify-center gap-2 transition-all duration-150
-              "
-            >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeLinecap="round"/>
-                  </svg>
-                  جاري التحقق...
-                </>
-              ) : 'دخول للمحفظة'}
-            </button>
-          </form>
-        )}
+              <button type="submit" className="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-lg active:scale-95">
+                إرسال رمز التحقق
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleOtpSubmit} className="animate-in fade-in slide-in-from-right-8 duration-300">
+              <div className="mb-6">
+                <label className="block text-sm font-bold text-slate-700 mb-2">رمز التحقق (OTP)</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                    <KeyRound className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <input type="number" value={otp} onChange={e => setOtp(e.target.value)}
+                    className="w-full pr-12 px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none tracking-[0.5em] text-2xl font-black text-center text-slate-900"
+                    placeholder="••••" autoFocus />
+                </div>
+                <p className="text-xs text-blue-600 mt-3 text-center font-medium bg-blue-50 py-2 rounded-lg">للتجربة: أدخل 1234</p>
+              </div>
+              <button type="submit" disabled={isLoading}
+                className="w-full py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 flex justify-center items-center gap-2 active:scale-95 disabled:opacity-60">
+                {isLoading ? <><i className="fa-solid fa-circle-notch fa-spin" /> جاري التحقق وإنشاء المفاتيح...</> : 'دخول للمحفظة'}
+              </button>
+              <button type="button" onClick={() => setAuthStep('LOGIN_NIN')}
+                className="w-full py-3 mt-3 text-slate-400 font-medium hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-colors">
+                تغيير الرقم الوطني
+              </button>
+            </form>
+          )}
+        </div>
       </div>
-
-      <p className="text-[11px] text-slate-300 mt-6">
-        بيانات مشفرة end-to-end · لا يمكن لأحد الاطلاع عليها
-      </p>
     </div>
   );
 }

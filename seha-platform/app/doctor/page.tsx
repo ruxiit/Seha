@@ -155,7 +155,7 @@ export default function DoctorPortal() {
         .slot-checkbox:checked + div { background-color: #14b8a6; color: white; border-color: #14b8a6; }
       `}} />
 
-      <div className="flex h-screen overflow-hidden antialiased bg-slate-50 pt-16" dir="rtl">
+      <div className="flex h-screen overflow-hidden antialiased bg-slate-50" dir="rtl">
 
         {/* ── Sidebar ── */}
         <aside className="w-72 bg-white border-l border-slate-200 flex flex-col z-20 shadow-sm shrink-0 hidden md:flex">

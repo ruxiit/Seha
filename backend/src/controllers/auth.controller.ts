@@ -159,42 +159,6 @@ export const verifyPatientOtp = async (req: Request, res: Response, next: NextFu
   }
 };
 
-export const adminLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { password } = req.body;
-
-    if (!password) {
-      const err = new Error('Password is required') as AppError;
-      err.status = 400;
-      throw err;
-    }
-
-    // Check hardcoded admin password
-    if (password !== 'adminseha2026') {
-      const err = new Error('Invalid admin password') as AppError;
-      err.status = 401;
-      throw err;
-    }
-
-    // Create JWT token for admin
-    const payload = {
-      id: 'admin_user',
-      nin_hash: 'admin',
-      role: 'admin'
-    };
-
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-
-    res.status(200).json({
-      message: 'Admin login successful',
-      token,
-      user: payload,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { nin, phone, password, role, profileData } = req.body;
@@ -207,20 +171,6 @@ export const register = async (req: Request, res: Response, next: NextFunction):
 
     const nin_hash = hashNIN(nin);
     const phone_hash = hashPhone(phone);
-
-    // Check if user already exists
-    const { data: existingUser, error: checkError } = await supabase
-      .from('Users')
-      .select('id')
-      .eq('nin_hash', nin_hash)
-      .single();
-
-    if (existingUser) {
-      const err = new Error('User with this NIN already exists') as AppError;
-      err.status = 409;
-      throw err;
-    }
-
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
     

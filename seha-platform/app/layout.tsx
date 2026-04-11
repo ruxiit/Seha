@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/Navbar";
-import { BookingProvider } from "@/lib/bookingStore";
 
 // Self-hosted via next/font — zero layout shift, no render-blocking
 const ibmPlexArabic = IBM_Plex_Sans_Arabic({
@@ -34,13 +32,14 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="h-full flex flex-col bg-slate-50 text-slate-900 font-sans"
+        className="h-full flex flex-col bg-slate-50 text-slate-900 overflow-hidden font-sans"
         suppressHydrationWarning
       >
-        <Navbar />
-        <BookingProvider>
-          {children}
-        </BookingProvider>
+        <div className="flex flex-1 overflow-hidden h-full">
+          <main className="flex-1 overflow-y-auto bg-slate-50">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );

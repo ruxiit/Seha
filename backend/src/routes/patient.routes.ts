@@ -5,7 +5,6 @@ import {
   getMyHistory,
   getPatientPrescriptionsByHash,
   getPatientProfileByPlainNIN,
-  getPatientMedicines,
 } from '../controllers/patient.controller';
 import { verifyToken, authorizeRole } from '../middleware/auth.middleware';
 
@@ -20,14 +19,10 @@ router.get('/public-key', verifyToken, authorizeRole(['doctor', 'admin']), getPa
 // [Patient] Get own history (requires JWT auth)
 router.get('/history', verifyToken, authorizeRole(['patient']), getMyHistory);
 
-// [Doctor] Get patient profile (name, age) by plain NIN
-router.get('/profile', verifyToken, authorizeRole(['doctor', 'admin']), getPatientProfileByPlainNIN);
-
-// More specific routes must come BEFORE generic :nin_hash routes
-// [Patient] Get medicines/diagnoses/treatments by nin_hash
-router.get('/:nin_hash/medicines', getPatientMedicines);
-
 // [Patient] Get own prescriptions by nin_hash (no token needed, secured by knowledge of hash)
 router.get('/:nin_hash/prescriptions', getPatientPrescriptionsByHash);
+
+// [Doctor] Get patient profile (name, age) by plain NIN
+router.get('/profile', verifyToken, authorizeRole(['doctor', 'admin']), getPatientProfileByPlainNIN);
 
 export default router;

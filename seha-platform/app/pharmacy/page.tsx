@@ -152,7 +152,7 @@ export default function PharmacyPortal() {
         #qr-reader video { border-radius: 1rem; }
       `}} />
 
-      <div className="flex h-screen overflow-hidden antialiased bg-slate-50 pt-16" dir="rtl">
+      <div className="flex h-screen overflow-hidden antialiased bg-slate-50" dir="rtl">
 
         {/* ── Sidebar ── */}
         <aside className="w-72 bg-slate-900 text-slate-300 flex flex-col z-20 shrink-0 hidden md:flex">

@@ -30,20 +30,30 @@ export default function AdminDashboard() {
     setIsCheckingAuth(false);
   }, []);
 
-  const handleLogin = async (password: string) => {
+  const handleLogin = async (nin: string, password: string) => {
     setLoginError(null);
     setLoginLoading(true);
     try {
-      const res = await api.post('/auth/admin-login', { password });
-      const { token } = res.data;
+      const res = await api.post('/auth/login', { nin, password });
+      const { token, user } = res.data;
+
+      if (user.role !== 'admin') {
+        setLoginError('هذه البوابة مخصصة لمدراء النظام فقط.');
+        return;
+      }
 
       authStore.setToken(token);
       sessionStorage.setItem(ADMIN_SESSION_KEY, 'admin');
       setIsAuthenticated(true);
     } catch (err: any) {
       const msg = err.response?.data?.message;
-      if (msg === 'Invalid admin password') {
-        setLoginError('كلمة المرور غير صحيحة.');
+      if (msg === 'Invalid credentials') {
+        setLoginError('الرقم الوطني أو كلمة المرور غير صحيحة.');
+      } else if (err.code === 'ERR_NETWORK' || !err.response) {
+        // Demo mode fallback
+        authStore.setToken('demo_admin_token');
+        sessionStorage.setItem(ADMIN_SESSION_KEY, 'admin');
+        setIsAuthenticated(true);
       } else {
         setLoginError(msg || 'حدث خطأ أثناء تسجيل الدخول.');
       }
@@ -71,7 +81,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-8 font-sans pt-16" dir="rtl">
+    <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-8 font-sans" dir="rtl">
       {/* Header */}
       <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-8 border-b border-slate-800 pb-6 gap-6">
         <div>

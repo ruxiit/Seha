@@ -16,7 +16,6 @@ import api from '@/lib/api';
 import jsPDF from 'jspdf';
 import QRCode from 'qrcode';
 import { Loader2 } from 'lucide-react';
-import PatientHistoryPanel from './PatientHistoryPanel';
 
 interface Medicine { id: string; name: string; category: string; }
 interface PrescriptionItem { medicine: Medicine; dosage: string; duration: string; }
@@ -103,9 +102,8 @@ export default function PrescriptionTab({ doctorInfo }: PrescriptionTabProps) {
       } else {
         setStatusMsg({ type: 'error', text: 'لم يتم العثور على بيانات المريض بهذا الرقم.' });
       }
-    } catch (err: unknown) {
-      const axiosErr = err as { response?: { status?: number } };
-      if (axiosErr.response?.status === 404) {
+    } catch (err: any) {
+      if (err.response?.status === 404) {
         setStatusMsg({ type: 'error', text: 'لم يتم العثور على مريض مسجل بهذا الرقم الوطني.' });
       } else {
         setStatusMsg({ type: 'error', text: 'خطأ في جلب بيانات المريض. يرجى المحاولة لاحقاً.' });
@@ -182,7 +180,6 @@ export default function PrescriptionTab({ doctorInfo }: PrescriptionTabProps) {
         if (res.data?.prescription?.id) {
           prescriptionId = res.data.prescription.id;
         }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error('Failed to create prescription on server:', err);
         throw new Error(err.response?.data?.message || 'تعذر سيرفر قاعدة البيانات، لا يمكن إصدار وصفة حقيقية.');
@@ -251,7 +248,6 @@ export default function PrescriptionTab({ doctorInfo }: PrescriptionTabProps) {
       setPrescriptionItems([]);
       setPatientNin('');
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
       setStatusMsg({ type: 'error', text: err.message || 'فشل إنشاء الوصفة. يرجى المحاولة مرة أخرى.' });
@@ -334,8 +330,6 @@ export default function PrescriptionTab({ doctorInfo }: PrescriptionTabProps) {
           </div>
         </div>
       </div>
-
-      <PatientHistoryPanel nin={patientNin} />
 
       {/* Medicine adder */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">

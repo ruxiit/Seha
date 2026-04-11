@@ -4,18 +4,19 @@ import React, { useState } from 'react';
 import { ShieldAlert, Lock, Eye, EyeOff, Loader2, AlertTriangle } from 'lucide-react';
 
 interface AdminAuthScreenProps {
-  onLogin: (password: string) => Promise<void>;
+  onLogin: (nin: string, password: string) => Promise<void>;
   isLoading: boolean;
   error: string | null;
 }
 
 export default function AdminAuthScreen({ onLogin, isLoading, error }: AdminAuthScreenProps) {
+  const [nin, setNin] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(password);
+    onLogin(nin, password);
   };
 
   return (
@@ -57,6 +58,23 @@ export default function AdminAuthScreen({ onLogin, isLoading, error }: AdminAuth
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* NIN */}
+            <div>
+              <label className="block text-xs font-bold text-slate-400 mb-2 tracking-wider">
+                الرقم الوطني (NIN)
+              </label>
+              <input
+                type="text"
+                value={nin}
+                onChange={e => setNin(e.target.value)}
+                placeholder="أدخل الرقم الوطني"
+                className="w-full bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-3.5 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all text-sm"
+                dir="ltr"
+                autoComplete="username"
+                required
+              />
+            </div>
+
             {/* Password */}
             <div>
               <label className="block text-xs font-bold text-slate-400 mb-2 tracking-wider">
@@ -67,7 +85,7 @@ export default function AdminAuthScreen({ onLogin, isLoading, error }: AdminAuth
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  placeholder="أدخل كلمة المرور"
+                  placeholder="كلمة المرور السرية"
                   className="w-full bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-3.5 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all text-sm pr-12"
                   dir="ltr"
                   autoComplete="current-password"
@@ -94,7 +112,7 @@ export default function AdminAuthScreen({ onLogin, isLoading, error }: AdminAuth
             {/* Submit */}
             <button
               type="submit"
-              disabled={isLoading || !password}
+              disabled={isLoading || !nin || !password}
               className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 mt-2"
             >
               {isLoading ? (
