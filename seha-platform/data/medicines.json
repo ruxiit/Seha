@@ -1,0 +1,22 @@
+[
+  { "id": "med_001", "name": "Paracetamol", "category": "Analgesic" },
+  { "id": "med_002", "name": "Amoxicillin", "category": "Antibiotic" },
+  { "id": "med_003", "name": "Ibuprofen", "category": "NSAID" },
+  { "id": "med_004", "name": "Omeprazole", "category": "PPI" },
+  { "id": "med_005", "name": "Azithromycin", "category": "Antibiotic" },
+  { "id": "med_006", "name": "Aspirin", "category": "Analgesic" },
+  { "id": "med_007", "name": "Metformin", "category": "Antidiabetic" },
+  { "id": "med_008", "name": "Lisinopril", "category": "ACE Inhibitor" },
+  { "id": "med_009", "name": "Atorvastatin", "category": "Statin" },
+  { "id": "med_010", "name": "Simvastatin", "category": "Statin" },
+  { "id": "med_011", "name": "Cetirizine", "category": "Antihistamine" },
+  { "id": "med_012", "name": "Loratadine", "category": "Antihistamine" },
+  { "id": "med_013", "name": "Salbutamol", "category": "Bronchodilator" },
+  { "id": "med_014", "name": "Amlodipine", "category": "Calcium Channel Blocker" },
+  { "id": "med_015", "name": "Ciprofloxacin", "category": "Antibiotic" },
+  { "id": "med_016", "name": "Diazepam", "category": "Benzodiazepine" },
+  { "id": "med_017", "name": "Fluoxetine", "category": "SSRI" },
+  { "id": "med_018", "name": "Sertraline", "category": "SSRI" },
+  { "id": "med_019", "name": "Clopidogrel", "category": "Antiplatelet" },
+  { "id": "med_020", "name": "Pantoprazole", "category": "PPI" }
+]
